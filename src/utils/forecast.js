@@ -1,20 +1,17 @@
-const request = require('request')
+const axios = require('axios')
 
 const forecast = (latitude, longitude, callback) => {
     const url = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + latitude 
     + '&lon=' + longitude + '&appid=a19ae9e380f363ef152f2a8e081a03a3'
 
-    request({ url, json: true }, (error, response) => {
-        if (error) {
-            callback('Unable to connect to weather service!', undefined)
-        } else if (response.message) {
-            callback('Unable to find location', undefined)
-        } else {
-            callback(undefined, response.current.weather.description + ' It is currently ' 
-            + response.current.temp + ' degress out. This wind speed today is ' 
-            + response.current.wind_speed + ' with a humidity of ' 
-            + response.current.humidity + '.')
-        }
+    axios.get(url).then(response => {
+        const { current } = response.data;
+        callback(undefined, current.weather[0].description + '. It is currently ' 
+        + (parseFloat(current.temp) - 273).toFixed(2) + ' degress out. The wind speed today is ' 
+        + current.wind_speed + ' mph with a humidity of ' + current.humidity + '.'
+        )
+    }).catch(error => {
+        callback('Unable to connect to weather service! Try Another Search!', undefined)
     })
 }
 
